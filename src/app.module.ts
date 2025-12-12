@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
         synchronize: true,
       }),
     }),
+    AuthModule,
     SubscriptionModule,
   ],
 })

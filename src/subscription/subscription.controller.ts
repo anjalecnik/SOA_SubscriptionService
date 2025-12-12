@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,6 +20,7 @@ import { SubscriptionService } from './subscription.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { Subscription } from './entities/subscription.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('subscriptions')
 @Controller('subscriptions')
@@ -29,6 +31,7 @@ export class SubscriptionController {
   // POST (1) — Create subscription
   // ─────────────────────────────────────────────
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Ustvari novo naročnino (recurring subscription)' })
   @ApiBody({ type: CreateSubscriptionDto })
   @ApiResponse({
@@ -44,6 +47,7 @@ export class SubscriptionController {
   // POST (2) — Trigger manual renewal
   // ─────────────────────────────────────────────
   @Post(':id/trigger')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Ročno sproži ustvarjanje novega expense-a' })
   @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({ status: 200, description: 'Expense uspešno ustvarjen' })
@@ -55,6 +59,7 @@ export class SubscriptionController {
   // GET (1) — Subscriptions by user
   // ─────────────────────────────────────────────
   @Get('user/:userId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Pridobi vse naročnine uporabnika' })
   @ApiParam({ name: 'userId', type: 'string' })
   @ApiResponse({
@@ -70,6 +75,7 @@ export class SubscriptionController {
   // GET (2) — One subscription
   // ─────────────────────────────────────────────
   @Get(':id/user/:userId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Pridobi eno naročnino' })
   @ApiParam({ name: 'id', type: 'string' })
   @ApiParam({ name: 'userId', type: 'string' })
@@ -82,6 +88,7 @@ export class SubscriptionController {
   // PUT (1) — Update subscription
   // ─────────────────────────────────────────────
   @Put(':id/user/:userId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Posodobi naročnino' })
   @ApiParam({ name: 'id', type: 'string' })
   @ApiParam({ name: 'userId', type: 'string' })
@@ -103,6 +110,7 @@ export class SubscriptionController {
   // PUT (2) — Pause subscription
   // ─────────────────────────────────────────────
   @Put(':id/pause')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Začasno ustavi naročnino' })
   @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({ status: 200, description: 'Naročnina je začasno ustavljena' })
@@ -114,6 +122,7 @@ export class SubscriptionController {
   // DELETE (1) — Soft delete / deactivate
   // ─────────────────────────────────────────────
   @Delete(':id/user/:userId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Deaktiviraj naročnino' })
   @ApiParam({ name: 'id', type: 'string' })
   @ApiParam({ name: 'userId', type: 'string' })
@@ -126,6 +135,7 @@ export class SubscriptionController {
   // DELETE (2) — Hard delete
   // ─────────────────────────────────────────────
   @Delete(':id/force')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Trajno izbriši naročnino (hard delete)' })
   @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({ status: 200, description: 'Naročnina je trajno izbrisana' })
