@@ -1,26 +1,26 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { RequestLoggingInterceptor } from './logging/request-logging.interceptor';
+import { RabbitLoggerService } from './logging/rabbit-logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS
-  app.enableCors({
-    origin: true, // ali konkretni origin npr. ['https://moja-domena.com']
-    credentials: true,
-  });
+  app.enableCors({ origin: true, credentials: true });
 
-  // Swagger config
   const config = new DocumentBuilder()
     .setTitle('My API')
     .setDescription('API documentation')
     .setVersion('1.0')
-    // .addBearerAuth() // če imaš JWT, lahko dodaš tudi to
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document); // swagger UI na /api
+  SwaggerModule.setup('api', app, document);
+
+  const rabbitLogger = app.get(RabbitLoggerService);
+  app.useGlobalInterceptors(new RequestLoggingInterceptor(rabbitLogger));
 
   await app.listen(process.env.PORT ?? 3000);
 }

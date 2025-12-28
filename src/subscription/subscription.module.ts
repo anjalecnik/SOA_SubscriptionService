@@ -4,9 +4,14 @@ import { SubscriptionService } from './subscription.service';
 import { SubscriptionController } from './subscription.controller';
 import { HttpModule } from '@nestjs/axios';
 import { Subscription } from './entities/subscription.entity';
+import { LoggingModule } from 'src/logging/logging.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Subscription]), HttpModule],
+  imports: [
+    TypeOrmModule.forFeature([Subscription]),
+    HttpModule,
+    LoggingModule,
+  ],
   providers: [SubscriptionService],
   controllers: [SubscriptionController],
 })

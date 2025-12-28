@@ -11,10 +11,10 @@ import {
   Subscription,
   SubscriptionInterval,
 } from './entities/subscription.entity';
+import { RabbitLoggerService } from 'src/logging/rabbit-logger.service';
 
 @Injectable()
 export class SubscriptionService {
-  private readonly logger = new Logger(SubscriptionService.name);
   private readonly expenseServiceUrl: string | undefined;
   private readonly notificationServiceUrl: string | undefined;
 
@@ -23,6 +23,7 @@ export class SubscriptionService {
     private readonly subscriptionRepo: Repository<Subscription>,
     private readonly config: ConfigService,
     private readonly http: HttpService,
+    private readonly rabbitLogger: RabbitLoggerService,
   ) {
     this.expenseServiceUrl = this.config.get<string>('EXPENSE_SERVICE_URL');
     this.notificationServiceUrl = this.config.get<string>(
@@ -119,7 +120,10 @@ export class SubscriptionService {
 
     if (!dueSubs.length) return;
 
-    this.logger.log(`Processing ${dueSubs.length} subscriptions`);
+    await this.rabbitLogger.info(`Processing ${dueSubs.length} subscriptions`, {
+      path: '/cron/processDueSubscriptions',
+      detail: `count=${dueSubs.length}`,
+    });
 
     for (const sub of dueSubs) {
       try {
@@ -129,9 +133,12 @@ export class SubscriptionService {
 
         await this.subscriptionRepo.save(sub);
       } catch (err) {
-        this.logger.error(
+        await this.rabbitLogger.error(
           `Error processing subscription ${sub.id}`,
-          (err as any)?.message ?? err,
+          {
+            path: '/cron/processDueSubscriptions',
+            detail: (err as any)?.message ?? String(err),
+          },
         );
       }
     }
